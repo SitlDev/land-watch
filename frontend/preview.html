@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch Pro — Elite Intelligence Map</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --bg-p: #080908; --bg-s: #0e110f; --bg-t: #141816; --bg-card: #161a18; --bg-h: #1c221f;
+  --tx-p: #e0e8e2; --tx-s: #90a592; --tx-t: #5b6b5d;
+  --br-p: #262c27; --br-s: #1c221e; --br-t: #141816;
+  --gr: #1a7f5a; --gr-d: #0f4a34; --gr-tx: #4dba8a;
+  --am: #b07a00; --am-d: #5a3d00; --am-tx: #e8a020;
+  --rd: #b04020; --rd-d: #5a2010; --rd-tx: #e05030;
+  --bl: #1a4fa0; --bl-d: #0d2850; --bl-tx: #4a8fe0;
+  --sb-w: 240px; --hdr-h: 56px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { height: 100vh; background: var(--bg-p); color: var(--tx-p); font-family: 'DM Mono', monospace; font-size: 11px; line-height: 1.4; overflow: hidden; }
+#app { display: flex; height: 100vh; }
+#sidebar { width: var(--sb-w); background: var(--bg-s); border-right: 0.5px solid var(--br-p); display: flex; flex-direction: column; z-index: 50; }
+.sb-logo { padding: 24px 20px 18px; border-bottom: 0.5px solid var(--br-p); }
+.sb-logo h1 { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; color: var(--tx-p); }
+.sb-logo p { font-size: 8px; color: var(--tx-t); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px; }
+.nav-group { padding: 16px 0 8px; }
+.nav-label { font-size: 8px; color: var(--tx-t); text-transform: uppercase; letter-spacing: 0.12em; padding: 0 20px 8px; }
+.nav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; cursor: pointer; color: var(--tx-s); transition: 0.1s; border-left: 2px solid transparent; }
+.nav-item:hover { background: var(--bg-h); color: var(--tx-p); }
+.nav-item.active { background: var(--bg-h); color: var(--tx-p); border-left-color: var(--gr-tx); }
+.nav-bdg { font-size: 8px; padding: 1px 5px; border-radius: 2px; background: var(--bg-t); color: var(--tx-t); }
+.nav-bdg.green { background: var(--gr-d); color: var(--gr-tx); }
+#main { flex: 1; display: flex; flex-direction: column; background: var(--bg-p); }
+.hdr { height: var(--hdr-h); border-bottom: 0.5px solid var(--br-p); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; background: var(--bg-s); }
+.hdr-titles h2 { font-size: 13px; font-weight: 500; }
+.hdr-titles p { font-size: 9px; color: var(--tx-t); margin-top: 2px; }
+.page-content { flex: 1; overflow-y: auto; padding: 24px; position: relative; }
+#map-container { width: 100%; height: 100%; border-radius: 4px; border: 0.5px solid var(--br-p); overflow: hidden; }
+.map-overlay { position: absolute; top: 36px; left: 36px; z-index: 1000; background: rgba(8,9,8,0.85); backdrop-filter: blur(8px); border: 0.5px solid var(--br-p); padding: 16px; border-radius: 4px; }
+.leaflet-container { background: var(--bg-p) !important; font-family: inherit !important; }
+.leaflet-popup-content-wrapper { background: var(--bg-card) !important; color: var(--tx-p) !important; border: 0.5px solid var(--br-p) !important; border-radius: 4px !important; box-shadow: none !important; }
+.leaflet-popup-tip { background: var(--bg-card) !important; }
+.mdl-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+.mdl { width: 600px; background: var(--bg-s); border: 0.5px solid var(--br-p); border-radius: 8px; padding: 32px; box-shadow: 0 24px 48px rgba(0,0,0,0.5); }
+.btn { font-family: inherit; font-size: 10px; padding: 10px 20px; border-radius: 4px; border: 0.5px solid; cursor: pointer; text-transform: uppercase; transition: 0.15s; }
+.btn-p { background: var(--gr-d); color: var(--gr-tx); border-color: var(--gr); }
+.btn-p:hover { background: var(--gr); color: #fff; }
+</style>
+</head>
+<body>
+<div id="app">
+  <nav id="sidebar">
+    <div class="sb-logo"><h1>LANDWATCH PRO</h1><p>Intelligence Map</p></div>
+    <div class="nav-group">
+      <div class="nav-label">Portals</div>
+      <div class="nav-item" onclick="location.reload()"><span>◈ Dashboard</span></div>
+      <div class="nav-item active"><span>🗺 Live Map</span> <span class="nav-bdg green">Live</span></div>
+    </div>
+  </nav>
+  <main id="main">
+    <header class="hdr">
+      <div class="hdr-titles"><h2>Live Intelligence Map</h2><p>Spatial distribution of active auction signals</p></div>
+    </header>
+    <div class="page-content">
+      <div id="map-container"></div>
+      <div class="map-overlay">
+        <div style="font-size:9px; color:var(--tx-t); margin-bottom:12px; letter-spacing:0.1em">TOPOGRAPHY LAYER</div>
+        <div style="display:flex; flex-direction:column; gap:8px">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:10px">
+            <input type="radio" name="layer" value="dark" checked> <span>Intelligence (Dark)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:10px">
+            <input type="radio" name="layer" value="sat"> <span>Satellite Terrain</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="mdl-root"></div>
+<script>
+const LISTINGS = [
+  { id: 1, title: "Ozark Timberland", lat: 35.86, lng: -93.18, score: 88, price: 28500, state: "AR", summary: "Premium Ozark timberland at 84% below assessed." },
+  { id: 2, title: "Rio Grande Desert Parcel", lat: 31.42, lng: -105.15, score: 74, price: 12000, state: "TX", summary: "Massive 320-acre desert parcel." },
+  { id: 3, title: "Lake County Lien", lat: 28.56, lng: -81.76, score: 82, price: 8200, state: "FL", summary: "Tax lien at 18% max rate." },
+  { id: 4, title: "Blue Ridge Mountain Lot", lat: 34.88, lng: -83.40, score: 91, price: 55000, state: "GA", summary: "Mountain view lot." }
+];
+
+const map = L.map('map-container').setView([37.8, -96], 4);
+const dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; Carto' }).addTo(map);
+const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' });
+
+document.querySelectorAll('input[name="layer"]').forEach(inp => {
+  inp.onchange = (e) => {
+    if (e.target.value === 'dark') { map.removeLayer(sat); dark.addTo(map); }
+    else { map.removeLayer(dark); sat.addTo(map); }
+  };
+});
+
+LISTINGS.forEach(l => {
+  const color = l.score >= 85 ? '#1a7f5a' : l.score >= 70 ? '#b07a00' : '#b04020';
+  L.circleMarker([l.lat, l.lng], { radius: 8, fillColor: color, color: "#fff", weight: 1, fillOpacity: 0.8 })
+    .addTo(map)
+    .bindPopup(`
+      <div style="padding:4px">
+        <div style="font-size:12px; font-weight:500; margin-bottom:4px">${l.title}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+          <span style="font-size:14px; font-weight:600; color:${color}">${l.score} SCO</span>
+          <span style="font-size:11px; color:var(--tx-s)">$${l.price.toLocaleString()}</span>
+        </div>
+        <button class="btn btn-p" style="width:100%; margin-top:12px; padding:6px" onclick="openMdl(${l.id})">VIEW ANALYSIS →</button>
+      </div>
+    `);
+});
+
+window.openMdl = (id) => {
+  const l = LISTINGS.find(x => x.id === id);
+  document.getElementById('mdl-root').innerHTML = `
+    <div class="mdl-overlay" onclick="this.innerHTML=''"><div class="mdl" onclick="event.stopPropagation()">
+      <h2 style="margin-bottom:16px">${l.title}</h2>
+      <p style="color:var(--tx-s); margin-bottom:24px; line-height:1.6">${l.summary}</p>
+      <button class="btn btn-p" onclick="document.getElementById('mdl-root').innerHTML=''">Close Intelligence</button>
+    </div></div>
+  `;
+};
+</script>
+</body>
+</html>

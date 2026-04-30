@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Listing {
+  id            String   @id @default(cuid())
+  title         String   @unique
+  state         String
+  county        String
+  acreage       Float
+  price         Float
+  pricePerAcre  Float
+  auctionType   String
+  source        String
+  sourceUrl     String
+  auctionDate   DateTime
+  closingDays   Int
+  score         Int
+  lat           Float?
+  lng           Float?
+  summary       String?
+  flags         String[]
+  risks         String[]
+  action        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  parcel        Parcel?  @relation(fields: [parcelId], references: [id])
+  parcelId      String?  @unique
+}
+
+model Parcel {
+  id                    String   @id @default(cuid())
+  assessedValue         Float
+  landValue             Float?
+  improvementValue      Float?
+  lastSalePrice         Float?
+  lastSaleDate          DateTime?
+  ownershipYears        Float?
+  priorTaxSales         Int      @default(0)
+  zoning                String?
+  encumbrances          String[]
+  taxDelinquentYears    Int      @default(0)
+
+  listing               Listing?
+}
+
+model County {
+  id                String   @id @default(cuid())
+  name              String
+  state             String
+  platform          String?
+  lastScraped       DateTime?
+  listingCount      Int      @default(0)
+  opportunityScore  Int?
+}

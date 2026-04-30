@@ -1,0 +1,19 @@
+{
+  "name": "landwatch-pro",
+  "version": "1.0.0",
+  "description": "Elite Land Auction Intelligence Platform",
+  "main": "backend/src/index.js",
+  "scripts": {
+    "build": "cd backend && npm install && npx prisma generate",
+    "start": "node backend/src/index.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "prisma": "^6.0.0",
+    "express": "latest",
+    "cors": "latest",
+    "dotenv": "latest"
+  },
+  "devDependencies": {
+  }
+}

@@ -1,0 +1,35 @@
+// Minimal inline initialization - no imports to avoid module loading issues
+window.LISTINGS = [
+  { id: 1, title: "Ozark Timberland", state: "AR", county: "Newton", acreage: 47.3, price: 28500, pricePerAcre: 602, auctionType: "Tax Deed", source: "Bid4Assets", sourceUrl: "https://bid4assets.com", auctionDate: "2026-04-15", closingDays: 14, score: 88, lat: 35.86, lng: -93.18, summary: "Premium Ozark timberland.", flags: ["Absolute auction"], risks: ["Quiet title may be needed"], action: "Act Fast", parcel: { assessedValue: 182000, landValue: 162000, improvementValue: 20000, lastSalePrice: 95000, lastSaleDate: "2018-06-01", ownershipYears: 7.9, priorTaxSales: 0, zoning: "Forestry", encumbrances: [], taxDelinquentYears: 3 } },
+  { id: 2, title: "Rio Grande Desert Parcel", state: "TX", county: "Hudspeth", acreage: 320, price: 12000, pricePerAcre: 37, auctionType: "Tax Deed", source: "GovEase", sourceUrl: "https://govease.com", auctionDate: "2026-04-22", closingDays: 7, score: 74, lat: 31.42, lng: -105.15, summary: "Desert parcel at deep discount.", flags: ["Large acreage"], risks: ["Desert land"], action: "Investigate", parcel: { assessedValue: 64000, landValue: 64000, improvementValue: 0, lastSalePrice: 18000, lastSaleDate: "2012-03-15", ownershipYears: 14.1, priorTaxSales: 1, zoning: "Rural", encumbrances: [], taxDelinquentYears: 4 } },
+  { id: 3, title: "Lake County Lien", state: "FL", county: "Lake", acreage: 0.5, price: 8200, pricePerAcre: 16400, auctionType: "Tax Lien", source: "RealAuction", sourceUrl: "https://realauction.com", auctionDate: "2026-03-01", closingDays: 45, score: 82, lat: 28.56, lng: -81.76, summary: "Tax lien at 18% max rate.", flags: ["18% max rate"], risks: ["Owner may redeem"], action: "Act Fast", parcel: { assessedValue: 42000, landValue: 38000, improvementValue: 4000, lastSalePrice: 52000, lastSaleDate: "2021-08-20", ownershipYears: 4.8, priorTaxSales: 0, zoning: "Residential", encumbrances: [], taxDelinquentYears: 2 } },
+  { id: 4, title: "Blue Ridge Mountain Lot", state: "GA", county: "Rabun", acreage: 12.8, price: 55000, pricePerAcre: 4296, auctionType: "Tax Deed", source: "GovEase", sourceUrl: "https://govease.com", auctionDate: "2026-05-10", closingDays: 30, score: 91, lat: 34.88, lng: -83.40, summary: "Mountain view lot.", flags: ["Mountain views"], risks: ["None"], action: "Act Fast", parcel: { assessedValue: 180000, landValue: 180000, improvementValue: 0, lastSalePrice: 145000, lastSaleDate: "2020-09-10", ownershipYears: 5.7, priorTaxSales: 0, zoning: "Residential", encumbrances: [], taxDelinquentYears: 2 } },
+  { id: 5, title: "Former Municipal Depot", state: "IL", county: "Peoria", acreage: 2.1, price: 31000, pricePerAcre: 14761, auctionType: "Government Surplus", source: "GSA", sourceUrl: "https://realestatesales.gov", auctionDate: "2026-04-28", closingDays: 3, score: 67, lat: 40.69, lng: -89.59, summary: "City maintenance depot.", flags: ["Below market"], risks: ["Environmental risk"], action: "Investigate", parcel: { assessedValue: 88000, landValue: 55000, improvementValue: 33000, lastSalePrice: 0, lastSaleDate: null, ownershipYears: 0, priorTaxSales: 0, zoning: "Commercial", encumbrances: [], taxDelinquentYears: 0 } },
+  { id: 6, title: "Chesapeake Bay Waterfront", state: "MD", county: "Dorchester", acreage: 3.4, price: 44000, pricePerAcre: 12941, auctionType: "Tax Lien", source: "CivicSource", sourceUrl: "https://civicsource.com", auctionDate: "2026-04-01", closingDays: 90, score: 79, lat: 38.42, lng: -76.08, summary: "Waterfront lien at 6-18% rate.", flags: ["Waterfront"], risks: ["Long hold period"], action: "Monitor", parcel: { assessedValue: 310000, landValue: 295000, improvementValue: 15000, lastSalePrice: 280000, lastSaleDate: "2019-04-01", ownershipYears: 7.1, priorTaxSales: 1, zoning: "Residential", encumbrances: [], taxDelinquentYears: 2 } },
+  { id: 7, title: "High Desert Ranch Land", state: "AZ", county: "Mohave", acreage: 160, price: 9800, pricePerAcre: 61, auctionType: "Tax Lien", source: "Bid4Assets", sourceUrl: "https://bid4assets.com", auctionDate: "2026-02-15", closingDays: 180, score: 71, lat: 35.19, lng: -114.05, summary: "16% lien rate on high desert parcel.", flags: ["16% rate"], risks: ["3-year hold"], action: "Monitor", parcel: { assessedValue: 28000, landValue: 28000, improvementValue: 0, lastSalePrice: 14000, lastSaleDate: "2008-11-01", ownershipYears: 17.5, priorTaxSales: 2, zoning: "Agricultural", encumbrances: [], taxDelinquentYears: 4 } },
+  { id: 8, title: "Pocono Cabin Lot", state: "PA", county: "Monroe", acreage: 1.2, price: 18500, pricePerAcre: 15416, auctionType: "Tax Deed", source: "Grant Street", sourceUrl: "https://deedauction.net", auctionDate: "2026-05-20", closingDays: 21, score: 85, lat: 41.03, lng: -75.34, summary: "No redemption period - clean title day one.", flags: ["No redemption"], risks: ["Perc test needed"], action: "Act Fast", parcel: { assessedValue: 68000, landValue: 68000, improvementValue: 0, lastSalePrice: 41000, lastSaleDate: "2016-07-15", ownershipYears: 9.9, priorTaxSales: 0, zoning: "Residential", encumbrances: [], taxDelinquentYears: 3 } },
+  { id: 9, title: "Mississippi Delta Farmland", state: "MS", county: "Bolivar", acreage: 80, price: 22000, pricePerAcre: 275, auctionType: "Tax Deed", source: "GovEase", sourceUrl: "https://govease.com", auctionDate: "2026-04-30", closingDays: 1, score: 76, lat: 33.79, lng: -90.73, summary: "Productive Delta farmland.", flags: ["Farmland"], risks: ["Closing tomorrow"], action: "Investigate", parcel: { assessedValue: 96000, landValue: 96000, improvementValue: 0, lastSalePrice: 58000, lastSaleDate: "2015-02-01", ownershipYears: 11.3, priorTaxSales: 1, zoning: "Agricultural", encumbrances: [], taxDelinquentYears: 5 } },
+  { id: 10, title: "Private Auction: Ranch Parcel", state: "NV", county: "Elko", acreage: 640, price: 195000, pricePerAcre: 304, auctionType: "Private Auction", source: "Land.com", sourceUrl: "https://land.com", auctionDate: "2026-05-15", closingDays: 16, score: 63, lat: 41.17, lng: -115.35, summary: "Section land (640 acres) in Nevada ranch country.", flags: ["640 acres"], risks: ["Reserve auction"], action: "Monitor", parcel: { assessedValue: 384000, landValue: 384000, improvementValue: 0, lastSalePrice: 220000, lastSaleDate: "2010-08-01", ownershipYears: 15.8, priorTaxSales: 0, zoning: "Grazing", encumbrances: [], taxDelinquentYears: 0 } }
+];
+
+window.COUNTIES = [];
+window.SCRAPE_JOBS = [];
+window.REDEMPTION_PERIODS = {};
+window.STATE_DATA = [];
+
+// Now load the app
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    console.log('Loading utils...');
+    window.utils = await import('./src/lib/utils.js');
+    console.log('Loading app...');
+    await import('./src/app.js');
+    console.log('App initialized successfully');
+  } catch (e) {
+    console.error('App init failed:', e);
+    const content = document.getElementById('content');
+    if (content) {
+      content.innerHTML = `<div style="padding:40px;color:#ff6b6b">Error: ${e.message}</div>`;
+    }
+  }
+});
