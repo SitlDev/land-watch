@@ -106,7 +106,8 @@ async function refreshListings() {
           statusEl.style.color = 'var(--gr-tx)';
         }
         if (timeEl) {
-          timeEl.textContent = `LAST SYNC: ${new Date().toLocaleTimeString()}`;
+          const mostRecent = LISTINGS.length > 0 ? new Date(Math.max(...LISTINGS.map(l => new Date(l.updatedAt)))) : new Date();
+          timeEl.textContent = `LAST SYSTEM SYNC: ${mostRecent.toLocaleString()}`;
         }
         console.log('◈ Dashboard updated from database');
       }
@@ -480,6 +481,7 @@ function lCard(l) {
       <div class="l-meta">
         <span><b>SOURCE:</b> ${l.source}</span>
         <span><b>AUCTION:</b> ${utils.formatDateShort(l.auctionDate)}</span>
+        <span><b>SCANNED:</b> ${new Date(l.updatedAt).toLocaleDateString()}</span>
         <span class="${l.closingDays <= 3 ? 'ur' : ''}"><b>CLOSING:</b> ${utils.daysLabel(l.closingDays)}</span>
       </div>
       <div class="l-bar-bg"><div class="l-bar-fg" style="width:${l.score}%; background:${color}"></div></div>
@@ -622,9 +624,20 @@ function renderTab(l, t) {
       <p style="font-size:12px; color:var(--tx-s); margin-bottom:24px">${l.summary}</p>
       <div class="sec-t"><span>POSITIVE INDICATORS</span></div>
       <ul class="ai-lst" style="margin-bottom:24px">${l.flags.map(f=>`<li>${f}</li>`).join('')}</ul>
-      <div class="ai-box" id="ai-an">
-        <div class="ai-t"><span>🤖 INVESTMENT ANALYSIS</span> <button class="btn btn-s" style="padding:4px 10px; font-size:8px" id="run-ai">Run Claude 4.5 →</button></div>
-        <div class="ai-c" style="color:var(--tx-t); font-style:italic">Ready for deep-dive parsing...</div>
+      <div class="ai-box" id="ai-an" style="border-color:var(--gr-tx)">
+        <div class="ai-t"><span>⚖ ACQUISITION ROADMAP — NEXT STEPS</span></div>
+        <div class="ai-c">
+          <div style="font-weight:600; color:var(--gr-tx); margin-bottom:8px">PROCEED TO ACQUISITION:</div>
+          <ol style="padding-left:16px; margin-bottom:16px">
+            <li><b>Verify Physicals:</b> Review Google Earth and County GIS to confirm accessibility and zoning (Currently: <b>${l.parcel?.zoning || 'Unverified'}</b>).</li>
+            <li><b>Financial Prep:</b> Ensure <b>${utils.fmt(l.price)}</b> in certified funds is available in your <b>${l.source}</b> account.</li>
+            <li><b>Register Bidding:</b> Navigate to <a href="${l.sourceUrl}" target="_blank" style="color:var(--bl-tx)">Source Portal</a> and complete registration for the <b>${utils.formatDateShort(l.auctionDate)}</b> auction.</li>
+            <li><b>Post-Win Action:</b> ${l.auctionType === 'Tax Deed' ? 'Record the deed with the county and initiate <b>Quiet Title Action</b> if reselling within 12 months.' : 'Monitor the <b>Redemption Window</b>. If unredeemed after the statutory period, file for a Tax Deed.'}</li>
+          </ol>
+          <div style="font-size:9px; color:var(--tx-t); border-top:1px solid var(--gr-d); padding-top:8px">
+            ◈ STRATEGY: This asset qualifies for a ${l.score > 85 ? '<b>High-Velocity Flip</b>' : '<b>Long-Term Yield</b>'} based on SCO score of ${l.score}.
+          </div>
+        </div>
       </div>
     `;
   }
