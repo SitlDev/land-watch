@@ -426,7 +426,7 @@ const frontendPath = path.join(__dirname, '../../frontend');
 app.use(express.static(frontendPath));
 
 // Fallback for Single Page Application (SPA) routing
-app.get('(.*)', (req, res) => {
+app.get('*path', (req, res) => {
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(frontendPath, 'index.html'));
   }
