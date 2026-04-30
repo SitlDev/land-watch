@@ -12,7 +12,8 @@ let state = {
   mdlId: null,
   saved: new Set(),
   fltrs: { search: '', state: '', type: '', minSc: 0, sort: 'sc' },
-  sync: { status: 'connected', last: new Date().toISOString() }
+  sync: { status: 'connected', last: new Date().toISOString() },
+  tblSort: { key: 'date', dir: 'asc' }
 };
 
 const PAGES = {
@@ -624,6 +625,34 @@ function renderTab(l, t) {
       <p style="font-size:12px; color:var(--tx-s); margin-bottom:24px">${l.summary}</p>
       <div class="sec-t"><span>POSITIVE INDICATORS</span></div>
       <ul class="ai-lst" style="margin-bottom:24px">${l.flags.map(f=>`<li>${f}</li>`).join('')}</ul>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px">
+        <div>
+          <div class="sec-t"><span>GEOGRAPHIC IDENTIFICATION</span></div>
+          <div style="background:var(--bg-t); border:0.5px solid var(--br-p); border-radius:4px; padding:16px">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px"><span style="color:var(--tx-t)">PARCEL ID (APN):</span> <span style="font-weight:600">${l.apn || 'N/A'}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px"><span style="color:var(--tx-t)">ADDRESS:</span> <span style="font-weight:600">${l.address || 'PO Box / Rural'}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px"><span style="color:var(--tx-t)">LOCATION:</span> <span style="font-weight:600">${l.city || 'Unknown'}, ${l.state} ${l.zip || ''}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-top:12px; padding-top:12px; border-top:0.5px solid var(--br-p)">
+              <span style="color:var(--tx-t)">COORDS:</span> 
+              <a href="https://www.google.com/maps?q=${l.lat},${l.lng}" target="_blank" style="color:var(--bl-tx); text-decoration:none">${l.lat?.toFixed(4)}, ${l.lng?.toFixed(4)} ↗</a>
+            </div>
+          </div>
+        </div>
+        ${l.images && l.images.length > 0 ? `
+        <div>
+          <div class="sec-t"><span>VISUAL CAPTURE</span></div>
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px">
+            ${l.images.map(img => `<img src="${img}" style="width:100%; height:80px; object-fit:cover; border-radius:4px; border:0.5px solid var(--br-p)">`).join('')}
+          </div>
+        </div>
+        ` : `
+        <div>
+          <div class="sec-t"><span>VISUAL CAPTURE</span></div>
+          <div style="height:80px; background:var(--bg-t); border:1px dashed var(--br-p); border-radius:4px; display:flex; align-items:center; justify-content:center; color:var(--tx-t); font-size:9px">No imagery available in registry</div>
+        </div>
+        `}
+      </div>
+
       <div class="ai-box" id="ai-an" style="border-color:var(--gr-tx)">
         <div class="ai-t"><span>⚖ ACQUISITION ROADMAP — NEXT STEPS</span></div>
         <div class="ai-c">
@@ -731,17 +760,17 @@ function renderCal(root) {
       <table class="tbl">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Property / County</th>
-            <th>State</th>
-            <th>Type</th>
-            <th>Asset Signal</th>
+            <th data-sort="date" style="cursor:pointer">Date ↕</th>
+            <th data-sort="title" style="cursor:pointer">Property / County ↕</th>
+            <th data-sort="state" style="cursor:pointer">State ↕</th>
+            <th data-sort="type" style="cursor:pointer">Type ↕</th>
+            <th data-sort="score" style="cursor:pointer">Asset Signal ↕</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
           ${future.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:48px; color:var(--tx-t)">No upcoming auctions indexed for the current period.</td></tr>' : 
-            future.map(l => `
+            sortListings(future, state.tblSort).map(l => `
             <tr>
               <td>
                 <div style="font-weight:600">${utils.formatDateShort(l.auctionDate)}</div>
@@ -919,18 +948,18 @@ function renderRedemp(root) {
             <table class="tbl">
               <thead>
                 <tr>
-                  <th>Property</th>
-                  <th>State</th>
-                  <th>Type</th>
-                  <th>Auction Date</th>
-                  <th>Redemption Period</th>
+                  <th data-sort="title" style="cursor:pointer">Property ↕</th>
+                  <th data-sort="state" style="cursor:pointer">State ↕</th>
+                  <th data-sort="type" style="cursor:pointer">Type ↕</th>
+                  <th data-sort="date" style="cursor:pointer">Auction Date ↕</th>
+                  <th data-sort="redemption" style="cursor:pointer">Redemption ↕</th>
                   <th>Rate</th>
                   <th>Title Clears</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                ${listings.map(l => {
+                ${sortListings(listings, state.tblSort).map(l => {
                   const rp = REDEMPTION_PERIODS[l.state] || REDEMPTION_PERIODS.DEFAULT;
                   const prg = rp.days === 0 ? 100 : utils.redemptionProgress(l.auctionDate, rp.days);
                   const clearDate = rp.days === 0 ? new Date(l.auctionDate) : utils.titleClearDate(l.auctionDate, rp.days);
@@ -1401,6 +1430,47 @@ function renderHelp(root) {
       </div>
     </div>
   `;
+}
+
+function sortListings(data, sort) {
+  const d = [...data];
+  d.sort((a, b) => {
+    let v1, v2;
+    if (sort.key === 'date') { v1 = new Date(a.auctionDate); v2 = new Date(b.auctionDate); }
+    else if (sort.key === 'title') { v1 = a.title; v2 = b.title; }
+    else if (sort.key === 'state') { v1 = a.state; v2 = b.state; }
+    else if (sort.key === 'type') { v1 = a.auctionType; v2 = b.auctionType; }
+    else if (sort.key === 'score') { v1 = a.score; v2 = b.score; }
+    else if (sort.key === 'redemption') {
+      v1 = (REDEMPTION_PERIODS[a.state] || REDEMPTION_PERIODS.DEFAULT).days;
+      v2 = (REDEMPTION_PERIODS[b.state] || REDEMPTION_PERIODS.DEFAULT).days;
+    }
+    else { v1 = a[sort.key]; v2 = b[sort.key]; }
+
+    if (v1 < v2) return sort.dir === 'asc' ? -1 : 1;
+    if (v1 > v2) return sort.dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return d;
+}
+
+function handleTblSort(e) {
+  const th = e.target.closest('th');
+  if (!th || !th.dataset.sort) return;
+  const key = th.dataset.sort;
+  if (state.tblSort.key === key) {
+    state.tblSort.dir = state.tblSort.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    state.tblSort.key = key;
+    state.tblSort.dir = 'asc';
+  }
+  render();
+}
+
+function attachListeners() {
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.onclick = handleTblSort;
+  });
 }
 
 init();

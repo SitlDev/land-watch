@@ -23,6 +23,11 @@ model Listing {
   score         Int
   lat           Float?
   lng           Float?
+  apn           String?
+  address       String?
+  city          String?
+  zip           String?
+  images        String[]
   documentUrl   String?
   summary       String?
   flags         String[]
