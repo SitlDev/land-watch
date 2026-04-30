@@ -3,9 +3,10 @@ FROM mcr.microsoft.com/playwright:v1.46.0-jammy
 
 WORKDIR /app
 
-# Copy package manifests first (for caching)
+# Copy package manifests and Prisma schema first (for caching)
 COPY package.json ./
 COPY backend/package.json ./backend/
+COPY backend/prisma ./backend/prisma
 
 # Install root dependencies
 RUN npm install
