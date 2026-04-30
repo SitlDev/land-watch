@@ -301,6 +301,30 @@ app.get('/api/aggregation/report', async (req, res) => {
   }
 });
 
+// Test 2-county deep scan
+app.post('/api/aggregation/test-scan', async (req, res) => {
+  try {
+    const manager = new DataAggregationManager();
+    const results = await manager.runSpecificSources(['docs']);
+    await manager.close();
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Full 3,144 county deep scan trigger
+app.post('/api/aggregation/full-scan', async (req, res) => {
+  try {
+    const manager = new DataAggregationManager();
+    manager.aggregateAllData().catch(e => console.error('Full scan background error:', e));
+    res.json({ status: 'Full scan initiated. Estimated completion: 18 hours.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // Manual data refresh endpoint (on-demand, triggers immediate fetch and resets weekly schedule)
 app.post('/api/data/refresh', async (req, res) => {
   try {

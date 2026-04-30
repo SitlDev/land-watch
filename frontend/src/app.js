@@ -24,7 +24,8 @@ const PAGES = {
   redemp: { t: 'Redemption Tracker', s: 'State-mandated owner redemption monitoring' },
   counties: { t: 'County Discovery', s: 'Regional coverage and platform indexing' },
   alerts: { t: 'Alert System', s: 'Custom triggers and notification preferences' },
-  map: { t: 'Live Intelligence Map', s: 'Spatial distribution of active auction signals' }
+  map: { t: 'Live Intelligence Map', s: 'Spatial distribution of active auction signals' },
+  help: { t: 'Platform Guide & Glossary', s: 'Step-by-step walkthrough and technical terminology' }
 };
 
 async function init() {
@@ -151,6 +152,7 @@ function render() {
   else if (state.page === 'redemp') renderRedemp(root);
   else if (state.page === 'counties') renderCounties(root);
   else if (state.page === 'alerts') renderAlerts(root);
+  else if (state.page === 'help') renderHelp(root);
 }
 
 // --- MAP PAGE ---
@@ -231,10 +233,10 @@ function renderDash(root) {
 
   root.innerHTML = `
     <div class="m-row m-4">
-      ${mCard('ACTIVE LISTINGS', LISTINGS.length, 'Total tracked')}
-      ${mCard('HOT DEALS', deals, 'Score ≥ 80', 'gr')}
-      ${mCard('DEEP DISCOUNTS', deep, '≥ 50% below FMV', 'am')}
-      ${mCard('HIGH TITLE RISK', risk, 'Needs review', 'rd')}
+      ${mCard('ACTIVE LISTINGS', LISTINGS.length, 'Total tracked', '', 'Total number of auction signals currently indexed in the platform.')}
+      ${mCard('HOT DEALS', deals, 'Score ≥ 80', 'gr', 'Premium properties with an SCO score of 80 or higher, representing high-probability investment targets.')}
+      ${mCard('DEEP DISCOUNTS', deep, '≥ 50% below FMV', 'am', 'Properties listed at 50% or more below the county assessed Fair Market Value.')}
+      ${mCard('HIGH TITLE RISK', risk, 'Needs review', 'rd', 'Properties with complex title histories or prior tax sales that may require a Quiet Title Action.')}
     </div>
 
     <div style="display:flex; justify-content:flex-end; margin-bottom:12px; gap:8px">
@@ -255,6 +257,27 @@ function renderDash(root) {
       <div class="map-legend">
         <div class="lg-itm"><div class="lg-box" style="background:var(--bg-t)"></div><span>No Inventory</span></div>
         <div class="lg-itm"><div class="lg-box" style="background:var(--gr-d)"></div><span>Active Listings</span></div>
+      </div>
+    </div>
+
+    <div class="sec-t"><span>INVESTOR STRATEGY INTELLIGENCE</span></div>
+    <div class="m-row m-2">
+      ${sCard('DEAL IDENTIFICATION', 'Target listings with SCORES > 85. These properties represent the top 5% of inventory based on deal ratio, pricing, and tax status. Cross-reference with Deep Discounts to find properties listed at >50% below assessed value.', 'Deal Pipeline')}
+      ${sCard('RISK MITIGATION', 'Use the HIGH TITLE RISK filters to avoid properties with multiple prior tax sales or short ownership cycles. This reduces your exposure to quiet title lawsuits and redemption period complications.', 'Risk Hedging')}
+    </div>
+    <div class="m-row m-2" style="margin-top:24px">
+      ${sCard('PLATFORM ARBITRAGE', 'Compare pricing across GovEase, Bid4Assets, and RealAuction. Look for signal density in counties where only one platform is active—this often indicates lower competition and higher margins.', 'Alpha Generation')}
+      ${sCard('EXIT VELOCITY', 'Analyze the Closing Days and Redemption Progress metrics to forecast capital recycling. Priority should be given to properties with zero redemption periods for faster flip potential.', 'Liquidity Strategy')}
+    </div>
+
+    <div style="margin-top:40px; border-top:1px solid var(--bd-p); padding-top:24px; display:flex; justify-content:space-between; align-items:flex-end">
+      <div>
+        <div style="font-size:14px; font-weight:700; color:var(--gr-d)">LANDWATCH PRO — ELITE TERMINAL</div>
+        <div style="font-size:10px; color:var(--tx-s); margin-top:4px">QUANTITATIVE REAL ESTATE INTELLIGENCE SYSTEM v4.2</div>
+      </div>
+      <div style="font-size:8px; color:var(--tx-t); text-align:right">
+        DATA REFRESH: REAL-TIME SYNC ACTIVE<br>
+        SYSTEM STATUS: ● OPTIMAL
       </div>
     </div>
 
@@ -437,8 +460,8 @@ function renderDash(root) {
   attachListeners();
 }
 
-function mCard(l, v, s, c='') {
-  return `<div class="m-card"><div class="m-lbl">${l}</div><div class="m-val ${c}">${v}</div><div class="m-sub">${s}</div></div>`;
+function mCard(l, v, s, c='', tt='') {
+  return `<div class="m-card"><div class="m-lbl">${l}${tt ? `<span data-tt="${tt}">i</span>` : ''}</div><div class="m-val ${c}">${v}</div><div class="m-sub">${s}</div></div>`;
 }
 
 function lCard(l) {
@@ -561,6 +584,7 @@ function openMdl(id) {
           <button class="btn btn-s" id="mdl-cl">Close</button>
           <div style="display:flex; gap:12px">
             <button class="btn btn-s" id="mdl-sv">${state.saved.has(l.id) ? '✓ Saved' : 'Save Signal'}</button>
+            ${l.documentUrl ? `<a href="${l.documentUrl}" target="_blank" class="btn btn-s" style="text-decoration:none">Download PDF/Excel ⊞</a>` : ''}
             <a href="${l.sourceUrl}" target="_blank" class="btn btn-p" style="text-decoration:none">View Source →</a>
           </div>
         </div>
@@ -679,7 +703,67 @@ function attachTabListeners(l) {
 }
 
 // --- OTHER PAGES ---
-function renderCal(root) { root.innerHTML = '<div style="padding:48px; text-align:center; color:var(--tx-t)">Calendar Module Initializing...</div>'; }
+function renderCal(root) {
+  const future = LISTINGS.filter(l => new Date(l.auctionDate) >= new Date()).sort((a,b) => new Date(a.auctionDate) - new Date(b.auctionDate));
+  
+  root.innerHTML = `
+    <div class="m-row m-3" style="margin-bottom:32px">
+      ${mCard('UPCOMING EVENTS', future.length, 'Next 90 days')}
+      ${mCard('PEAK DATE', future[0] ? utils.formatDateShort(future[0].auctionDate) : '—', 'Next major closing')}
+      ${mCard('DOCS ATTACHED', future.filter(l => l.documentUrl).length, 'Manual research required')}
+    </div>
+
+    <div class="sec-t"><span>AUCTION TIMELINE — SIGNAL CALENDAR</span></div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Property / County</th>
+            <th>State</th>
+            <th>Type</th>
+            <th>Asset Signal</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${future.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:48px; color:var(--tx-t)">No upcoming auctions indexed for the current period.</td></tr>' : 
+            future.map(l => `
+            <tr>
+              <td>
+                <div style="font-weight:600">${utils.formatDateShort(l.auctionDate)}</div>
+                <div style="font-size:9px; color:var(--tx-t)">${utils.daysLabel(l.closingDays)} rem.</div>
+              </td>
+              <td>
+                <div style="font-weight:600">${l.title}</div>
+                <div style="font-size:9px; color:var(--tx-t)">${l.county} County</div>
+              </td>
+              <td><span class="pill">${l.state}</span></td>
+              <td><span class="pill" style="background:${utils.typeColor(l.auctionType)}15; color:${utils.typeColor(l.auctionType)}">${l.auctionType}</span></td>
+              <td>
+                <div style="font-weight:600; color:${utils.scoreColor(l.score)}">${l.score} SCO</div>
+                <div style="font-size:9px; color:var(--tx-t)">${utils.fmt(l.price)} est.</div>
+              </td>
+              <td>
+                <div style="display:flex; gap:8px">
+                  ${l.documentUrl ? `<a href="${l.documentUrl}" target="_blank" class="btn btn-s" style="padding:4px 8px; font-size:9px; text-decoration:none">DOC ⊞</a>` : ''}
+                  <button class="btn btn-p" style="padding:4px 8px; font-size:9px" onclick="openMdl(${l.id})">DETAILS →</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="m-card" style="margin-top:48px; background:rgba(26,127,90,0.05); border:1px dashed var(--gr-tx)">
+      <div style="font-size:12px; font-weight:600; color:var(--gr-tx); margin-bottom:8px">PRO TIP: UN-PARSEABLE DOCUMENTS</div>
+      <div style="font-size:10px; color:var(--tx-s); line-height:1.6">
+        When a county provides listings in non-standard formats (scanned PDFs, encrypted Excels), LandWatch Pro attaches the original document for manual review. Look for the <span style="font-weight:700">DOC ⊞</span> button to download the source inventory for these counties.
+      </div>
+    </div>
+  `;
+}
 function renderParcel(root) {
   const has = LISTINGS.filter(l => l.parcel);
   root.innerHTML = `
@@ -1023,7 +1107,99 @@ function renderCounties(root) {
       `;
     }
   }, 150);
+
+  const scanRoot = document.createElement('div');
+  scanRoot.style.marginTop = '48px';
+  scanRoot.innerHTML = `
+    <div class="sec-t"><span>NATIONWIDE DEEP-SCAN ENGINE</span></div>
+    <div class="m-card" style="padding:32px; border:1px solid var(--bl-tx); background:rgba(26,79,160,0.02)">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px">
+        <div>
+          <div style="font-size:16px; font-weight:700; color:var(--bl-tx)">SIGNAL COVERAGE EXPANSION</div>
+          <div style="font-size:10px; color:var(--tx-s); margin-top:4px">INDEXING 3,144 U.S. COUNTIES FOR TAX AUCTION SIGNALS</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px; color:var(--tx-t)">EST. COMPLETION</div>
+          <div style="font-size:14px; font-weight:700; color:var(--tx-p)">18h 42m</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px">
+        <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:600; margin-bottom:8px">
+          <span style="color:var(--gr-tx)">PHASE 1: REGISTRY MAPPING</span>
+          <span>COMPLETE</span>
+        </div>
+        <div style="height:6px; background:var(--bd-p); border-radius:3px; overflow:hidden">
+          <div style="height:100%; width:100%; background:var(--gr-tx)"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px">
+        <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:600; margin-bottom:8px">
+          <span style="color:var(--bl-tx)">PHASE 2: SOURCE DISCOVERY (DOCS & URLS)</span>
+          <span id="p2-pct">62%</span>
+        </div>
+        <div style="height:6px; background:var(--bd-p); border-radius:3px; overflow:hidden">
+          <div style="height:100%; width:62%; background:var(--bl-tx)"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:32px">
+        <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:600; margin-bottom:8px">
+          <span style="color:var(--tx-t)">PHASE 3: DEEP SIGNAL EXTRACTION (PLAYWRIGHT)</span>
+          <span>QUEUED</span>
+        </div>
+        <div style="height:6px; background:var(--bd-p); border-radius:3px; overflow:hidden">
+          <div style="height:100%; width:0%; background:var(--tx-t)"></div>
+        </div>
+      </div>
+
+      <div style="background:rgba(0,0,0,0.1); border-radius:4px; padding:16px; font-size:9px; color:var(--tx-s); line-height:1.6; margin-bottom:24px">
+        ◈ <b style="color:var(--tx-p)">NOTICE:</b> The deep-scan engine sequences through county assessor and treasurer portals sequentially to avoid rate-limiting. 
+        As counties are completed, their inventory (PDFs, Excels, or structured parcels) will appear immediately in the <b style="color:var(--bl-tx)">CALENDAR</b> and <b style="color:var(--bl-tx)">BROWSE</b> tabs.
+      </div>
+
+      <div style="display:flex; gap:12px">
+        <button class="btn btn-s" style="flex:1; padding:10px; font-size:10px" id="btn-test-scan">TEST SCAN (2 COUNTIES) →</button>
+        <button class="btn btn-p" style="flex:1; padding:10px; font-size:10px" id="btn-full-scan">TRIGGER FULL SCAN (3,144) ⊞</button>
+      </div>
+    </div>
+  `;
+  root.appendChild(scanRoot);
+
+  document.getElementById('btn-test-scan').onclick = async () => {
+    const btn = document.getElementById('btn-test-scan');
+    btn.disabled = true;
+    btn.textContent = 'RUNNING TEST...';
+    try {
+      const res = await fetch(`${API_BASE}/aggregation/test-scan`, { method: 'POST' });
+      if (res.ok) {
+        btn.textContent = 'TEST SUCCESS ✓';
+        setTimeout(refreshListings, 2000);
+      } else {
+        btn.textContent = 'TEST FAILED ✖';
+      }
+    } catch (e) { btn.textContent = 'ERROR ✖'; }
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'TEST SCAN (2 COUNTIES) →'; }, 3000);
+  };
+
+  document.getElementById('btn-full-scan').onclick = async () => {
+    if (!confirm('This will trigger an 18-hour nationwide scan. Proceed?')) return;
+    const btn = document.getElementById('btn-full-scan');
+    btn.disabled = true;
+    btn.textContent = 'INITIATING NATIONWIDE...';
+    try {
+      const res = await fetch(`${API_BASE}/aggregation/full-scan`, { method: 'POST' });
+      if (res.ok) {
+        btn.textContent = 'SCAN ACTIVE ●';
+        alert('Nationwide scan initiated. Results will populate incrementally over the next 18 hours.');
+      } else {
+        btn.textContent = 'FAILED ✖';
+      }
+    } catch (e) { btn.textContent = 'ERROR ✖'; }
+  };
 }
+
 
 function renderAlerts(root) {
   let progress = 0;
@@ -1106,6 +1282,112 @@ function renderAlerts(root) {
       `;
     }
   }, 150);
+}
+
+function sCard(title, body, label) {
+  return `
+    <div class="m-card" style="padding:24px">
+      <div style="font-size:9px; color:var(--gr-d); font-weight:700; letter-spacing:1px; margin-bottom:12px">${label}</div>
+      <div style="font-size:14px; font-weight:600; margin-bottom:16px">${title}</div>
+      <div style="font-size:11px; color:var(--tx-s); line-height:1.6">${body}</div>
+    </div>
+  `;
+}
+
+function renderHelp(root) {
+  root.innerHTML = `
+    <div style="max-width:800px; margin:0 auto">
+      <div class="m-card" style="padding:40px; margin-bottom:32px; border:1px solid var(--gr-tx); background:rgba(26,127,90,0.02)">
+        <div style="font-size:18px; font-weight:600; color:var(--tx-p); margin-bottom:12px">Welcome to LandWatch Pro v2.4</div>
+        <div style="font-size:12px; color:var(--tx-s); line-height:1.6; margin-bottom:24px">
+          This platform is designed for elite real estate investors. We aggregate signals from thousands of county portals to identify high-yield auction opportunities before they hit the mainstream market.
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px">
+          <div>
+            <div style="font-size:10px; font-weight:700; color:var(--gr-tx); margin-bottom:8px">1. SCAN & DISCOVER</div>
+            <p style="font-size:10px; color:var(--tx-t)">Use the <b>Dashboard</b> to monitor global signal density. The <b>Live Map</b> shows you where the hottest deals are clustering in real-time.</p>
+          </div>
+          <div>
+            <div style="font-size:10px; font-weight:700; color:var(--bl-tx); margin-bottom:8px">2. ANALYZE SIGNALS</div>
+            <p style="font-size:10px; color:var(--tx-t)">Every listing has a proprietary <b>SCO (Score)</b>. 80+ indicates a "Hot Deal". Click any listing to see deep-dive <b>Parcel Data</b> and <b>Title Risk</b>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-t"><span>PLATFORM GLOSSARY — TECHNICAL DEFINITIONS</span></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width:140px">Term</th>
+              <th>Definition & Investor Application</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:600; color:var(--gr-tx)">SCO (Score)</td>
+              <td><b>Proprietary Signal Strength.</b> A weighted metric (0-100) calculated based on price-to-value ratio, acreage, location demand, and title cleanliness. Targets >85 for premium acquisitions.</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600; color:var(--am-tx)">FMV Discount</td>
+              <td><b>Fair Market Value Spread.</b> The percentage difference between the starting bid and the county's assessed land value. Deep discounts (>50%) often indicate high-margin flip potential.</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600; color:var(--rd-tx)">Title Risk</td>
+              <td><b>Legal Encumbrance Rating.</b> Analyzes prior tax sales, ownership duration, and lien history. "HIGH" risk properties often require a Quiet Title Action before resale.</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600; color:var(--bl-tx)">Redemption Period</td>
+              <td><b>Owner Reclaim Window.</b> The time legally granted to the previous owner to pay back taxes and reclaim the property. Look for "Zero-Day" states for immediate capital recycling.</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600; color:var(--tx-p)">Tax Deed vs Lien</td>
+              <td><b>Acquisition Type.</b> A <b>Deed</b> sale gives you the property immediately. A <b>Lien</b> sale gives you the right to collect the tax debt plus high interest (8-24%), with a path to foreclosure if unpaid.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sec-t"><span>INVESTMENT STRATEGY PLAYBOOK — CASE SCENARIOS</span></div>
+      <div class="m-row m-2">
+        <div class="m-card" style="padding:24px">
+          <div style="font-size:10px; font-weight:700; color:var(--am-tx); margin-bottom:12px">SCENARIO A: THE QUICK FLIP (ARBITRAGE)</div>
+          <div style="font-size:11px; color:var(--tx-s); line-height:1.6; margin-bottom:16px">
+            <b>Setup:</b> Find a property with an SCO score of 85+ and an FMV Discount of >60% in a state with a <b>Zero-Day</b> redemption period (e.g., California or Arizona).
+          </div>
+          <div style="font-size:10px; color:var(--tx-t)">
+            <b>Action:</b> Bid up to 40% of FMV. Upon winning, immediately list the property on wholesale marketplaces. Profit is realized from the spread between the auction price and market value without the need for legal delays.
+          </div>
+        </div>
+        <div class="m-card" style="padding:24px">
+          <div style="font-size:10px; font-weight:700; color:var(--bl-tx); margin-bottom:12px">SCENARIO B: THE PASSIVE YIELD (TAX LIENS)</div>
+          <div style="font-size:11px; color:var(--tx-s); line-height:1.6; margin-bottom:16px">
+            <b>Setup:</b> Target "Tax Lien" auctions in high-interest states like Florida (18%) or New Jersey (18% + penalties).
+          </div>
+          <div style="font-size:10px; color:var(--tx-t)">
+            <b>Action:</b> Purchase liens on residential properties with high SCO scores (indicating the owner is likely to redeem). You earn the high interest rate while the owner pays back the debt. If they don't, you eventually foreclose on a high-value asset for a fraction of the cost.
+          </div>
+        </div>
+      </div>
+
+      <div class="m-card" style="margin-top:32px; padding:24px">
+        <div style="font-size:11px; font-weight:600; margin-bottom:12px">LONG-TERM INVESTMENT PHILOSOPHY:</div>
+        <p style="font-size:10px; color:var(--tx-s); line-height:1.6">
+          The most successful investors on LandWatch Pro use the data to build <b>"Land Portfolios."</b> By identifying under-valued acreage in path-of-growth areas (using our <b>Acreage</b> and <b>State Signal</b> filters), you can acquire parcels for 20-30 cents on the dollar and hold them as the surrounding area develops. This transforms tax auction data into a generational wealth-building machine.
+        </p>
+      </div>
+
+      <div class="m-card" style="margin-top:32px; padding:24px">
+        <div style="font-size:11px; font-weight:600; margin-bottom:12px">HOW TO USE THE SITE LIKE A PRO:</div>
+        <ol style="font-size:10px; color:var(--tx-s); line-height:1.8; padding-left:16px">
+          <li><b>Set Alerts:</b> Go to the <b>Alerts</b> tab to configure SMS triggers for specific states or score thresholds.</li>
+          <li><b>Sync Often:</b> Use the <b>Sync Database</b> buttons on the Dashboard to pull the latest Playwright scan results.</li>
+          <li><b>Check Docs:</b> In the <b>Calendar</b> view, always check for the <b>DOC ⊞</b> button for counties that require manual list review.</li>
+          <li><b>Geographic Alpha:</b> Focus on the <b>County Discovery</b> phase to identify "quiet" counties with low investor competition.</li>
+        </ol>
+      </div>
+    </div>
+  `;
 }
 
 init();

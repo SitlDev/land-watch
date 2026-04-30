@@ -155,6 +155,15 @@ body { height: 100vh; background: var(--bg-p); color: var(--tx-p); font-family: 
 .leaflet-popup-content-wrapper { background: var(--bg-card) !important; color: var(--tx-p) !important; border: 0.5px solid var(--br-p) !important; border-radius: 4px !important; }
 .leaflet-popup-tip { background: var(--bg-card) !important; }
 .map-overlay { position: absolute; top: 12px; left: 12px; z-index: 1000; background: rgba(8,9,8,0.8); backdrop-filter: blur(4px); border: 0.5px solid var(--br-p); padding: 12px; border-radius: 4px; pointer-events: none; }
+/* TOOLTIPS */
+[data-tt] { position: relative; cursor: help; display: inline-flex; align-items: center; justify-content: center; width: 12px; height: 12px; border-radius: 50%; border: 0.5px solid var(--tx-t); font-size: 8px; color: var(--tx-t); margin-left: 4px; vertical-align: middle; }
+[data-tt]::after {
+  content: attr(data-tt); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-8px);
+  width: 180px; padding: 10px; background: var(--bg-h); color: var(--tx-p); border: 0.5px solid var(--br-p);
+  font-size: 9px; line-height: 1.4; border-radius: 4px; visibility: hidden; opacity: 0; transition: 0.2s; z-index: 2000; font-weight: 400; text-transform: none; letter-spacing: normal;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4); pointer-events: none;
+}
+[data-tt]:hover::after { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(-4px); }
 </style>
 </head>
 <body>
@@ -184,6 +193,7 @@ body { height: 100vh; background: var(--bg-p); color: var(--tx-p); font-family: 
         <div class="nav-label">Tools</div>
         <div class="nav-item" data-pg="counties"><span>⊙ Discovery</span></div>
         <div class="nav-item" data-pg="alerts"><span>◎ Alerts</span></div>
+        <div class="nav-item" data-pg="help" style="color:var(--gr-tx); border-top:1px solid var(--br-p); margin-top:12px; padding-top:12px"><span>⚡ Guide & Glossary</span></div>
       </div>
     </div>
     <div class="sb-status">

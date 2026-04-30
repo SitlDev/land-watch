@@ -21,7 +21,8 @@ class DataAggregationManager {
       govease: require('./scrapers/GovEaseScraper'),
       bid4assets: require('./scrapers/Bid4AssetsScraper'),
       auction_com: require('./scrapers/AuctionComScraper'),
-      realauction: require('./scrapers/RealAuctionScraper')
+      realauction: require('./scrapers/RealAuctionScraper'),
+      docs: require('./scrapers/DocumentRegistryScraper')
     };
 
     this.stats = {
@@ -61,6 +62,7 @@ class DataAggregationManager {
       bid4assets: null,
       auction_com: null,
       realauction: null,
+      docs: null,
       summary: {
         totalListings: 0,
         successfulSources: 0,
@@ -77,7 +79,8 @@ class DataAggregationManager {
       'govease',  // Third-party marketplace
       'bid4assets', // Third-party marketplace
       'auction_com', // Third-party marketplace
-      'realauction' // Third-party marketplace
+      'realauction', // Third-party marketplace
+      'docs'       // Fallback document registry
     ];
 
     for (const sourceKey of executionOrder) {

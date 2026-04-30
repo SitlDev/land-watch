@@ -23,6 +23,7 @@ model Listing {
   score         Int
   lat           Float?
   lng           Float?
+  documentUrl   String?
   summary       String?
   flags         String[]
   risks         String[]
